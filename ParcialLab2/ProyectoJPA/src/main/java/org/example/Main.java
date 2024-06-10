@@ -6,8 +6,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+
 public class Main {
     public static void main(String[] args) {
+
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("example-unit");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
@@ -151,14 +153,20 @@ public class Main {
             entityManager.getTransaction().commit();
             Usuario_Cliente retrievedUsuarioCliente = entityManager.find(Usuario_Cliente.class, usuarioCliente.getId());
             System.out.println("Retrieved UsuarioCliente: " + retrievedUsuarioCliente.getCliente());
-        }catch (Exception e){
-            entityManager.getTransaction().rollback();
-            System.out.println(e.getMessage());
-            System.out.println("No se pudo grabar la clase ");}
 
-        // Cerrar el EntityManager y el EntityManagerFactory
-        entityManager.close();
-        entityManagerFactory.close();
+
+        }catch (Exception e){
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            e.printStackTrace();
+            System.out.println("No se pudo completar la transacción.");
+        } finally {
+            entityManager.close();
+            entityManagerFactory.close();
         }
+        }
+
+
 
 }
